@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Customer Service Workstation</title>
+<style>
+:root{
+  --navy:#7f3340; --blue:#CB5264; --light:#fff6f7; --border:#edd9dd;
+  --text:#4a2f35; --muted:#8a6d74; --success:#4f8a67; --danger:#b84b5b;
+  --white:#fff; --panel:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#fff6f7;color:var(--text)}
+.app{min-height:100vh;display:grid;grid-template-rows:64px 1fr}
+.topbar{background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.topbar h1{margin:0;font-size:22px} .topbar .tag{font-size:13px;opacity:.9}
+.main{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:0}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:18px 14px}
+.section-title{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin:6px 8px 10px;font-weight:700}
+.nav-item{padding:11px 12px;border-radius:8px;margin-bottom:6px;font-size:14px}
+.nav-item.active{background:#fbe8ec;color:#CB5264;font-weight:700}
+.content{padding:22px;overflow:auto}
+.workspace{max-width:1120px;margin:0 auto;display:grid;gap:16px}
+.case-header,.card{background:#fff;border:1px solid var(--border);border-radius:12px}
+.case-header{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.case-title{font-size:18px;font-weight:700;margin-bottom:4px} .case-meta{color:var(--muted);font-size:13px}
+.card{overflow:hidden}
+.card-header{background:#fff8f9;border-bottom:1px solid var(--border);padding:14px 18px;font-weight:700}
+.card-body{padding:18px}
+.btn{border:0;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--blue);color:#fff} .btn.secondary{background:#fff;border:1px solid var(--border);color:var(--text)}
+.search-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}
+.field{display:grid;gap:7px;margin-bottom:16px}
+label{font-size:14px;font-weight:700}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #d9c3c8;border-radius:8px;background:#fff;color:var(--text);font-size:14px}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(203,82,100,.18);border-color:var(--blue)}
+.helper{font-size:12px;color:var(--muted)}
+.hidden{display:none!important}
+.alert{border-radius:10px;padding:14px 15px;margin-top:14px;line-height:1.45;font-size:14px}
+.alert.danger{background:#fff5f5;border:1px solid #feb2b2;color:#9b2c2c}
+.alert.info{background:#ebf8ff;border:1px solid #90cdf4;color:#2c5282}
+.alert.success{background:#f0fff4;border:1px solid #9ae6b4;color:#276749}
+.details-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.detail{padding:8px 10px;border:1px solid #eadde0;border-radius:8px;background:#fffafb}
+.detail span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.detail strong{font-size:13px}
+.progress{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
+.step-dot{width:22px;height:22px;border-radius:50%;border:2px solid #c9d4dc;display:grid;place-items:center;font-size:11px;font-weight:700}
+.step.active{color:var(--blue);font-weight:700} .step.active .step-dot{border-color:var(--blue);background:#eaf2f6}
+.step.done{color:var(--success)} .step.done .step-dot{border-color:var(--success);background:#f0fff4}
+.arrow{color:#a0aec0}
+.log-box{border:1px solid #cbd8e2;border-radius:10px;overflow:hidden}
+.log-box-title{background:#fbe8ec;padding:12px 14px;font-weight:800}
+.log-box-body{padding:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.summary{display:grid;gap:10px;margin-top:12px}
+.summary-row{display:flex;justify-content:space-between;gap:20px;padding:9px 0;border-bottom:1px solid #edf1f4}
+.summary-row:last-child{border-bottom:0}
+.summary-row span:first-child{color:var(--muted)}
+.ref{font-family:Consolas,monospace;font-weight:800;font-size:20px;letter-spacing:.04em}
+@media(max-width:850px){
+  .main{grid-template-columns:1fr} .sidebar{display:none}
+  .details-grid,.grid-2{grid-template-columns:1fr}
+  .search-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div>
+      <h1>Customer Service Workstation</h1>
+      
+    </div>
+    <div class="tag">Training Simulation</div>
+  </header>
+
+  <div class="main">
+    <aside class="sidebar">
+      <div class="section-title">Workspace</div>
+      <div class="nav-item active">Support Case</div>
+      <div class="nav-item">Customer Profile</div>
+      <div class="nav-item">Bookings</div>
+      <div class="nav-item">Claims</div>
+      <div class="section-title" style="margin-top:22px">Practice</div>
+      <div class="nav-item">New Case</div>
+    </aside>
+
+    <main class="content">
+      <div class="workspace">
+        <section class="case-header">
+          <div>
+            <div class="case-title">Luggage Delay Compensation Request</div>
+            <div class="case-meta">Practice case • Search the customer booking to begin</div>
+          </div>
+          <button id="resetBtn" class="btn secondary" type="button">Start New Case</button>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="progress">
+              <div id="step1" class="step active"><span class="step-dot">1</span> Find Booking</div>
+              <span class="arrow">›</span>
+              <div id="step2" class="step"><span class="step-dot">2</span> Booking Review</div>
+              <span class="arrow">›</span>
+              <div id="step3" class="step"><span class="step-dot">3</span> Log Delay Claim</div>
+              <span class="arrow">›</span>
+              <div id="step4" class="step"><span class="step-dot">4</span> Confirmation</div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <section id="searchSection">
+              <div class="search-row">
+                <div class="field" style="margin-bottom:0">
+                  <label for="bookingRefInput">Booking Reference Number</label>
+                  <input id="bookingRefInput" type="text" placeholder="Enter booking reference" autocomplete="off">
+                </div>
+                <button id="searchBtn" class="btn primary" type="button">Search Booking</button>
+              </div>
+              <div id="searchError" class="alert danger hidden">
+                Booking reference not found. Check the reference number and try again.
+              </div>
+            </section>
+
+            <section id="bookingDetailsSection" class="hidden" style="margin-top:18px">
+              <div class="card" style="box-shadow:none">
+                <div class="card-header">Booking Details</div>
+                <div class="card-body">
+                  <div class="details-grid">
+                    <div class="detail"><span>Customer Name</span><strong id="dName"></strong></div>
+                    <div class="detail"><span>Booking Reference</span><strong id="dRef"></strong></div>
+                    <div class="detail"><span>Airline</span><strong id="dAirline"></strong></div>
+                    <div class="detail"><span>Flight Number</span><strong id="dFlight"></strong></div>
+                    <div class="detail"><span>Origin</span><strong id="dOrigin"></strong></div>
+                    <div class="detail"><span>Destination</span><strong id="dDestination"></strong></div>
+                    <div class="detail"><span>Departure</span><strong id="dDeparture"></strong></div>
+                    <div class="detail"><span>Arrival</span><strong id="dArrival"></strong></div>
+                    <div class="detail"><span>Booking Status</span><strong id="dStatus"></strong></div>
+                    <div class="detail"><span>Travel Class</span><strong id="dClass"></strong></div>
+                    <div class="detail"><span>Baggage</span><strong id="dBaggage"></strong></div>
+                    <div class="detail"><span>Seat</span><strong id="dSeat"></strong></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="existingClaimSection" class="hidden" style="margin-top:18px">
+              <div id="activeClaimCard" class="alert info hidden">
+                <strong>Log Delay Claim: Active</strong><br>
+                Reference Number:
+                <span class="ref" id="existingRef" style="display:inline-block;margin-left:6px"></span>
+              </div>
+
+              <div style="margin-top:14px">
+                <button id="openLogClaimBtn" class="btn primary" type="button">Log Delay Claim</button>
+              </div>
+
+            </section>
+
+            <section id="logClaimSection" class="hidden" style="margin-top:18px">
+              <div class="log-box">
+                <div class="log-box-title">Log Delay Claim</div>
+                <div class="log-box-body">
+                  <div class="grid-2">
+                    <div class="field">
+                      <label for="delayDuration">Delay Duration</label>
+                      <input id="delayDuration" type="text" placeholder="e.g. 8 hours">
+                    </div>
+                    <div class="field">
+                      <label for="oopCosts">Did the customer incur any out-of-pocket costs?</label>
+                      <select id="oopCosts">
+                        <option value="">Select an answer</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="claimNotes">Notes</label>
+                    <textarea id="claimNotes" rows="3" placeholder="Enter case notes"></textarea>
+                  </div>
+
+                  <button id="submitBtn" class="btn primary" type="button">Submit Claim</button>
+                  <div id="validation" class="alert danger hidden"></div>
+                </div>
+              </div>
+            </section>
+
+            <section id="confirmationSection" class="hidden" style="margin-top:18px">
+              <div class="alert success"><strong>Request submitted.</strong></div>
+
+              <div class="summary">
+                <div class="summary-row">
+                  <span>Reference Number</span>
+                  <span id="newRef" class="ref"></span>
+                </div>
+                <div class="summary-row">
+                  <span>Review Process</span>
+                  <strong>3–5 business days</strong>
+                </div>
+              </div>
+
+              <div style="margin-top:18px">
+                <div class="log-box">
+                  <div class="log-box-title">Close Case</div>
+                  <div class="log-box-body">
+                    <div class="field" style="max-width:560px">
+                      <label for="macroSelect">Macro</label>
+                      <select id="macroSelect">
+                        <option value="">Select a macro</option>
+                      </select>
+                    </div>
+
+                    <div id="macroFlag" class="alert danger hidden">
+                      The selected macro does not match this process. Please choose the correct case-closing macro before closing the ticket.
+                    </div>
+
+                    <button id="closeCaseBtn" class="btn primary" type="button">Close Case</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+(() => {
+  const bookings = [{"bookingRef": "SKY7A2Q9", "customerName": "Emma Carter", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK218", "origin": "London (LHR)", "destination": "Barcelona (BCN)", "departure": "22 Oct 2026, 09:20", "arrival": "22 Oct 2026, 12:35", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "1 checked bag", "seat": "18A", "existingClaim": false, "existingClaimRef": ""}, {"bookingRef": "SKY4M8L3", "customerName": "Lucas Martin", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK441", "origin": "Paris (CDG)", "destination": "Rome (FCO)", "departure": "22 Oct 2026, 14:10", "arrival": "22 Oct 2026, 16:15", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "1 checked bag", "seat": "22C", "existingClaim": true, "existingClaimRef": "SKY-4M9X3K"}, {"bookingRef": "SKY9T1B6", "customerName": "Sofia Nielsen", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK305", "origin": "Copenhagen (CPH)", "destination": "Amsterdam (AMS)", "departure": "23 Oct 2026, 07:40", "arrival": "23 Oct 2026, 09:10", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "1 checked bag", "seat": "14D", "existingClaim": false, "existingClaimRef": ""}, {"bookingRef": "SKY2R5V8", "customerName": "Daniel Weber", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK672", "origin": "Berlin (BER)", "destination": "Lisbon (LIS)", "departure": "23 Oct 2026, 11:05", "arrival": "23 Oct 2026, 14:25", "bookingStatus": "Completed", "travelClass": "Economy Plus", "baggage": "2 checked bags", "seat": "11F", "existingClaim": false, "existingClaimRef": ""}, {"bookingRef": "SKY6P3N4", "customerName": "Olivia Rossi", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK157", "origin": "Milan (MXP)", "destination": "Madrid (MAD)", "departure": "23 Oct 2026, 15:30", "arrival": "23 Oct 2026, 17:45", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "1 checked bag", "seat": "20B", "existingClaim": true, "existingClaimRef": "SKY-8F2Q7A"}, {"bookingRef": "SKY8K4C1", "customerName": "Noah Jensen", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK529", "origin": "Oslo (OSL)", "destination": "Stockholm (ARN)", "departure": "24 Oct 2026, 06:50", "arrival": "24 Oct 2026, 08:00", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "1 checked bag", "seat": "16E", "existingClaim": false, "existingClaimRef": ""}, {"bookingRef": "SKY3H7X5", "customerName": "Mia Andersen", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK816", "origin": "Helsinki (HEL)", "destination": "Vienna (VIE)", "departure": "24 Oct 2026, 08:15", "arrival": "24 Oct 2026, 10:30", "bookingStatus": "Completed", "travelClass": "Economy Plus", "baggage": "1 checked bag", "seat": "9A", "existingClaim": false, "existingClaimRef": ""}, {"bookingRef": "SKY5D9F2", "customerName": "Ethan Brown", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK390", "origin": "Dublin (DUB)", "destination": "Brussels (BRU)", "departure": "24 Oct 2026, 09:45", "arrival": "24 Oct 2026, 12:20", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "1 checked bag", "seat": "24F", "existingClaim": true, "existingClaimRef": "SKY-7P1D6R"}, {"bookingRef": "SKY1Q6J7", "customerName": "Isabella Moore", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK744", "origin": "Zurich (ZRH)", "destination": "Prague (PRG)", "departure": "24 Oct 2026, 12:25", "arrival": "24 Oct 2026, 14:05", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "2 checked bags", "seat": "17C", "existingClaim": false, "existingClaimRef": ""}, {"bookingRef": "SKY0W3R8", "customerName": "Liam Taylor", "airline": "SKYLA-Partner Carrier", "flightNumber": "SK963", "origin": "Budapest (BUD)", "destination": "Athens (ATH)", "departure": "24 Oct 2026, 13:40", "arrival": "24 Oct 2026, 16:35", "bookingStatus": "Completed", "travelClass": "Economy", "baggage": "1 checked bag", "seat": "21A", "existingClaim": false, "existingClaimRef": ""}];
+  const claimRefs = ["SKY-8F2Q7A", "SKY-4M9X3K", "SKY-7P1D6R", "SKY-2L8V5N", "SKY-9C4T1B", "SKY-5H7J2W", "SKY-3R6K8P", "SKY-1N5Q9F", "SKY-6B2M4X", "SKY-8T3V7C"];
+  let unusedRefs = [...claimRefs];
+  let currentBooking = null;
+
+  const byId = id => document.getElementById(id);
+  const bookingRefInput = byId("bookingRefInput");
+  const searchBtn = byId("searchBtn");
+  const searchError = byId("searchError");
+  const bookingDetailsSection = byId("bookingDetailsSection");
+  const existingClaimSection = byId("existingClaimSection");
+  const activeClaimCard = byId("activeClaimCard");
+  const openLogClaimBtn = byId("openLogClaimBtn");
+  const existingRef = byId("existingRef");
+  const logClaimSection = byId("logClaimSection");
+  const confirmationSection = byId("confirmationSection");
+  const delayDuration = byId("delayDuration");
+  const oopCosts = byId("oopCosts");
+  const claimNotes = byId("claimNotes");
+  const submitBtn = byId("submitBtn");
+  const validation = byId("validation");
+  const newRef = byId("newRef");
+  const macroSelect = byId("macroSelect");
+  const macroFlag = byId("macroFlag");
+  const closeCaseBtn = byId("closeCaseBtn");
+  const resetBtn = byId("resetBtn");
+
+  function takeReference() {
+    if (!unusedRefs.length) unusedRefs = [...claimRefs];
+    const i = Math.floor(Math.random() * unusedRefs.length);
+    return unusedRefs.splice(i, 1)[0];
+  }
+
+  function setStep(n) {
+    for (let i=1; i<=4; i++) {
+      const s = byId("step"+i);
+      s.classList.remove("active","done");
+      if (i < n) s.classList.add("done");
+      if (i === n) s.classList.add("active");
+    }
+  }
+
+  function renderBooking(b) {
+    byId("dName").textContent = b.customerName;
+    byId("dRef").textContent = b.bookingRef;
+    byId("dAirline").textContent = b.airline;
+    byId("dFlight").textContent = b.flightNumber;
+    byId("dOrigin").textContent = b.origin;
+    byId("dDestination").textContent = b.destination;
+    byId("dDeparture").textContent = b.departure;
+    byId("dArrival").textContent = b.arrival;
+    byId("dStatus").textContent = b.bookingStatus;
+    byId("dClass").textContent = b.travelClass;
+    byId("dBaggage").textContent = b.baggage;
+    byId("dSeat").textContent = b.seat;
+  }
+
+  function resetAfterBooking() {
+    activeClaimCard.classList.add("hidden");
+    logClaimSection.classList.add("hidden");
+    confirmationSection.classList.add("hidden");
+    delayDuration.value = "";
+    oopCosts.value = "";
+    claimNotes.value = "";
+    validation.classList.add("hidden");
+    macroSelect.innerHTML = '<option value="">Select a macro</option>';
+    macroFlag.classList.add("hidden");
+  }
+
+  function searchBooking() {
+    const ref = bookingRefInput.value.trim().toUpperCase();
+    searchError.classList.add("hidden");
+    bookingDetailsSection.classList.add("hidden");
+    existingClaimSection.classList.add("hidden");
+    resetAfterBooking();
+
+    const match = bookings.find(b => b.bookingRef === ref);
+    if (!match) {
+      currentBooking = null;
+      searchError.classList.remove("hidden");
+      setStep(1);
+      return;
+    }
+
+    currentBooking = match;
+    renderBooking(match);
+    bookingDetailsSection.classList.remove("hidden");
+    existingClaimSection.classList.remove("hidden");
+
+    if (match.existingClaim) {
+      existingRef.textContent = match.existingClaimRef;
+      activeClaimCard.classList.remove("hidden");
+    }
+
+    setStep(2);
+  }
+
+  searchBtn.addEventListener("click", searchBooking);
+  bookingRefInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") searchBooking();
+  });
+
+  openLogClaimBtn.addEventListener("click", () => {
+    if (!currentBooking) return;
+
+    logClaimSection.classList.remove("hidden");
+    setStep(3);
+    logClaimSection.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  submitBtn.addEventListener("click", () => {
+    validation.classList.add("hidden");
+    const duration = delayDuration.value.trim();
+    const costs = oopCosts.value;
+
+    if (!costs) {
+      validation.textContent = "Select whether the customer incurred out-of-pocket costs before submitting.";
+      validation.classList.remove("hidden");
+      return;
+    }
+
+    // Delay duration can be left blank in the documented edge case.
+    newRef.textContent = takeReference();
+
+    const macros = [
+      "Delay Claim Submitted",
+      "Baggage Follow-Up Required",
+      "Travel Support Resolved",
+      "Carrier Escalation Logged",
+      "Customer Update Sent"
+    ];
+
+    // Shuffle macro order for each practice attempt.
+    const shuffled = [...macros].sort(() => Math.random() - 0.5);
+    macroSelect.innerHTML = '<option value="">Select a macro</option>';
+    shuffled.forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      macroSelect.appendChild(opt);
+    });
+
+    macroFlag.classList.add("hidden");
+
+    confirmationSection.classList.remove("hidden");
+    setStep(4);
+    confirmationSection.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  macroSelect.addEventListener("change", () => {
+    macroFlag.classList.add("hidden");
+  });
+
+  closeCaseBtn.addEventListener("click", () => {
+    macroFlag.classList.add("hidden");
+
+    if (macroSelect.value !== "Delay Claim Submitted") {
+      macroFlag.textContent = "That is not the correct macro to use for this process.";
+      macroFlag.classList.remove("hidden");
+      return;
+    }
+
+    currentBooking = null;
+    bookingRefInput.value = "";
+    searchError.classList.add("hidden");
+    bookingDetailsSection.classList.add("hidden");
+    existingClaimSection.classList.add("hidden");
+    resetAfterBooking();
+    setStep(1);
+    window.scrollTo({top:0,behavior:"smooth"});
+    bookingRefInput.focus();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    currentBooking = null;
+    bookingRefInput.value = "";
+    searchError.classList.add("hidden");
+    bookingDetailsSection.classList.add("hidden");
+    existingClaimSection.classList.add("hidden");
+    resetAfterBooking();
+    setStep(1);
+    bookingRefInput.focus();
+  });
+
+  setStep(1);
+})();
+</script>
+</body>
+</html>
